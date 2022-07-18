@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
 import _ from "lodash";
 import Head from "next/head";
-import { CardPrice } from "../components/cardPrice";
-import { ButtonCoin } from "../components/buttonCoin";
+import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
+
 import { getTicker } from "../../../redux/actions";
 import { RootState } from "../../../redux/reducers/index";
-import { useRouter } from "next/router";
+
+import { CardPrice } from "../components/cardPrice";
+import { ButtonCoin } from "../components/buttonCoin";
+
 import useInterval from "../../../hooks/useInterval";
 
 const coins = [
