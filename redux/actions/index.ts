@@ -1,6 +1,9 @@
-export const getTicker = (pair: string) => {
+import { Ticker } from "./../../type/ticker";
+
+export const getTicker = (tickerList: Ticker[], pair: string) => {
   return {
     type: "GET_TICKER_REQUESTED",
-    pair: pair,
+    tickerList: tickerList,
+    pair: pair?.toLowerCase(),
   };
 };

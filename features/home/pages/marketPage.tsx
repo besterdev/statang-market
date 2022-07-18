@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import _ from "lodash";
 import Head from "next/head";
-import { CardPrice } from "../components/cardPrice";
-import { ButtonCoin } from "../components/buttonCoin";
+import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
+import useWebSocket from "react-use-websocket";
+
+import { CardPrice } from "../components/cardPrice";
+import { ButtonCoin } from "../components/buttonCoin";
+
 import { getTicker } from "../../../redux/actions";
 import { RootState } from "../../../redux/reducers/index";
-import { useRouter } from "next/router";
-import useInterval from "../../../hooks/useInterval";
 
 const coins = [
   {
@@ -41,39 +43,31 @@ export const MarketPage = () => {
   const dispatch = useDispatch();
 
   //---------------------
-  // STATE
-  //---------------------
-  const [isPlaying, setPlaying] = useState<boolean>(false);
-
-  //---------------------
   // VARIABLE
   //---------------------
   const ticker = useSelector((state: RootState) => state.ticker.ticker);
   const loading = useSelector((state: RootState) => state.ticker.loading);
   const error: any = useSelector((state: RootState) => state.ticker.error);
 
-  //---------------------
-  // EFFECT
-  //---------------------
-  useEffect(() => {
-    setPlaying(false);
-    handlerFilter();
-  }, [pair]);
-
-  useInterval(
-    () => {
-      handlerFilter();
-    },
-    isPlaying ? 5000 : null
-  );
+  useWebSocket("wss://ws.satangcorp.com/ws/!miniTicker@arr", {
+    onOpen: () => console.log("WebSocket connection opened."),
+    onMessage: (event: WebSocketEventMap["message"]) => processMessages(event),
+  });
 
   //---------------------
   // HANDLER
   //---------------------
-  const handlerFilter = async () => {
-    const pairType = (await pair) as string;
-    await dispatch(getTicker(pairType?.toLowerCase()));
-    setPlaying(true);
+  const processMessages = async (event: { data: string }) => {
+    const response = JSON.parse(event.data);
+    const data = await _.filter(response, (item) => {
+      return _.includes(["btc_thb", "busd_thb", "usdt_thb"], item.s);
+    });
+    const ticker = await _.map(data, (item) => ({
+      lastPrice: item.c,
+      symbol: item.s,
+      volume: item.q,
+    }));
+    await dispatch(getTicker(ticker, pair as string));
   };
 
   //---------------------

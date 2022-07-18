@@ -40,23 +40,14 @@ const tickerReducer = (state = initialState, action: Action) => {
       return {
         ...state,
         loading: true,
-        // ticker: {
-        //   lastPrice: "0",
-        //   symbol: "btc_thb",
-        //   volume: "0",
-        //   image: "",
-        // },
       };
     case "GET_TICKER_SUCCESS":
       const ticker = _.find(action.ticker, (item) => {
         return item.symbol === action.pair;
       });
-      // console.log(action.pair);
-
       if (ticker) {
         ticker.image = getLogoCoin(ticker?.symbol);
       }
-      // console.log(ticker);
       return { ...state, loading: false, ticker: ticker };
     case "GET_TICKER_FAILED":
       return { ...state, loading: false, error: action.message };
